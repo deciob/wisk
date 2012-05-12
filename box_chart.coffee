@@ -22,14 +22,11 @@ class boxChart
     @vis_id = vis_id
 #    @min = Infinity
 #    @max = -Infinity
-    @duration = 500
+    @duration = 1000
     
-
-  draw: (chart) ->
+    
+  setScales: (dataset) ->
     self = @
-    dataset = self.c.dataset
-    
-    console.log 'data', dataset
     # Compute the new y-scale.
     self.y1 = d3.scale.linear()
       # range inverted because svg y positions are counted from top to bottom
@@ -44,6 +41,30 @@ class boxChart
 
     # Stash the new y scale.
     self.__chart__ = self.y1
+    
+    
+
+  draw: (chart) ->
+    
+    self = @
+    dataset = self.c.dataset
+    
+    @setScales(dataset)
+    
+#    # Compute the new y-scale.
+#    self.y1 = d3.scale.linear()
+#      # range inverted because svg y positions are counted from top to bottom
+#      .domain([dataset.min, dataset.max])  # input
+#      .range([self.c.height, 0])     # output 
+#
+#    # Retrieve the old y-scale, if this is an update.
+#    self.y0 = self.__chart__ || d3.scale.linear()
+#      # input inverted because svg y positions are counted from top to bottom
+#      .domain([0, Infinity])   # input
+#      .range(self.y1.range())  # output 
+#
+#    # Stash the new y scale.
+#    self.__chart__ = self.y1
 
     # Set the parent svg, with a g element that wraps everything else.
     self.svg = d3.select("##{self.vis_id}")
@@ -69,7 +90,7 @@ class boxChart
     #   box_chart = new boxChart(vis_id)
     #   chart = box_chart.init()
     #   box_chart.draw(chart)  # this function
-    self.boxes.selectAll("g.box")
+    self.b = self.boxes.selectAll("g.box")
       .data(dataset.data)
     .enter().append("g")
       .attr("class", "box")
@@ -78,8 +99,15 @@ class boxChart
       .attr("height",
         self.c.height + self.c.margin.bottom + self.c.margin.top)
       .call(chart)
-        
-    #)
+      
+      
+  update: (chart) ->
+    self = @
+    getData = (d, i) ->
+      self.c.dataset.data[i]
+    @setScales(self.c.dataset)
+    #if self.c.axis then self.setYAxis.call(@, self)
+    @b.datum(getData).call(chart)
     
 
   init: (conf) ->
@@ -94,7 +122,6 @@ class boxChart
     @c = $.extend(yes, c, conf)
 
     box = (g) ->
-      console.log 'box', g
       g.each( (d, i) ->
         # create a box plot for each data group
         @g = d3.select(@)
@@ -151,7 +178,6 @@ class boxChart
       
       
   setSpread: (self, d, i) ->
-    console.log d, i
     x = self.c.width * (i) + (self.c.margin.left + self.c.width) / 2
     spread = @g.selectAll("line.spread")
       .data([[d3.min(d), d3.max(d)]])
@@ -174,7 +200,6 @@ class boxChart
       
     
   setMidspread: (self, d, i) ->
-    #console.log self.boxQuartiles(d)
     margin = self.c.margin
     mid_data = []
     mid_data.push(self.boxQuartiles(d)[0])
@@ -190,11 +215,13 @@ class boxChart
       .attr("y", (d) -> self.y0(d[1]) )
       .attr("width", self.c.width - margin.left)
       .attr("height", (d) -> self.y0(d[0]) - self.y0(d[1]) )
-    .transition(self.duration)
+    .transition()
+      .duration(self.duration)
       .attr("y", (d) -> self.y1(d[1]) )
       .attr("height", (d) -> self.y1(d[0]) - self.y1(d[1]) )
       
     midspread.transition(self.duration)
+      .duration(self.duration)
       .attr("y", (d) -> self.y1(d[1]) )
       .attr("height", (d) -> self.y1(d[0]) - self.y1(d[1]) )
   

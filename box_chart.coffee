@@ -18,78 +18,68 @@ class boxChart
   #    </svg>
   #  </div>
   
-  constructor: (vis_id) -> 
+  constructor: (vis_id) ->
     @vis_id = vis_id
-    @min = Infinity
-    @max = -Infinity
+#    @min = Infinity
+#    @max = -Infinity
     @duration = 500
-
+    
 
   draw: (chart) ->
     self = @
-    # TODO: sort out data origins
-    d3.csv("../data/life_expectancy_2010.csv", (csv) ->
-      self.data = []
-      data_child = []  # initial assumption: only 1 data group
-      csv.forEach( (y) ->
-        d = y.val
-        if d != ""
-          data_child.push(d)
-          if (d > self.max) then self.max = d
-          if (d < self.min) then self.min = d
-      )
-      self.data.push( data_child.sort( (a, b) -> d3.ascending(a, b) ) )
-      
-      # Compute the new y-scale.
-      self.y1 = d3.scale.linear()
-        # range inverted because svg y positions are counted from top to bottom
-        .domain([self.min, self.max])  # input
-        .range([self.c.height, 0])     # output 
-      
-      # Retrieve the old y-scale, if this is an update.
-      self.y0 = self.__chart__ || d3.scale.linear()
-        # input inverted because svg y positions are counted from top to bottom
-        .domain([0, Infinity])   # input
-        .range(self.y1.range())  # output 
-      
-      # Stash the new y scale.
-      self.__chart__ = self.y1
- 
-      # Set the parent svg, with a g element that wraps everything else.
-      self.svg = d3.select("##{self.vis_id}")
-        .append("svg")
-        .attr("class", "parent")
-        .attr("width", 
-          self.c.width * self.data.length + 
-          (self.c.margin.left + self.c.margin.right) * 2 )
-        .attr("height", 
-          self.c.height + self.c.margin.bottom + self.c.margin.top)
-        .append("g")
-      
-      # Set the axis (common to all boxes).
-      if self.c.axis then self.setYAxis.call(@, self)
-      
-      # Set a common g element for all boxes.
-      self.boxes = self.svg.append("g")
-        .attr("class", "boxes")
-        .attr("transform", 
-          "translate(#{self.c.margin.left * 2}, #{self.c.margin.top})")
-      
-      # Individual boxes. Note the call to chart, a closure set as:
-      #   box_chart = new boxChart(vis_id)
-      #   chart = box_chart.init()
-      #   box_chart.draw(chart)  # this function
-      self.boxes.selectAll("g.box")
-        .data(self.data)
-      .enter().append("g")
-        .attr("class", "box")
-        .attr("width", 
-          self.c.width + self.c.margin.left + self.c.margin.right)
-        .attr("height", 
-          self.c.height + self.c.margin.bottom + self.c.margin.top)
-        .call(chart)
+    dataset = self.c.dataset
+    
+    console.log 'data', dataset
+    # Compute the new y-scale.
+    self.y1 = d3.scale.linear()
+      # range inverted because svg y positions are counted from top to bottom
+      .domain([dataset.min, dataset.max])  # input
+      .range([self.c.height, 0])     # output 
+
+    # Retrieve the old y-scale, if this is an update.
+    self.y0 = self.__chart__ || d3.scale.linear()
+      # input inverted because svg y positions are counted from top to bottom
+      .domain([0, Infinity])   # input
+      .range(self.y1.range())  # output 
+
+    # Stash the new y scale.
+    self.__chart__ = self.y1
+
+    # Set the parent svg, with a g element that wraps everything else.
+    self.svg = d3.select("##{self.vis_id}")
+      .append("svg")
+      .attr("class", "parent")
+      .attr("width",
+        self.c.width * dataset.data.length +
+        (self.c.margin.left + self.c.margin.right) * 2 )
+      .attr("height",
+        self.c.height + self.c.margin.bottom + self.c.margin.top)
+      .append("g")
+
+    # Set the axis (common to all boxes).
+    if self.c.axis then self.setYAxis.call(@, self)
+
+    # Set a common g element for all boxes.
+    self.boxes = self.svg.append("g")
+      .attr("class", "boxes")
+      .attr("transform",
+        "translate(#{self.c.margin.left * 2}, #{self.c.margin.top})")
+
+    # Individual boxes. Note the call to chart, a closure set as:
+    #   box_chart = new boxChart(vis_id)
+    #   chart = box_chart.init()
+    #   box_chart.draw(chart)  # this function
+    self.boxes.selectAll("g.box")
+      .data(dataset.data)
+    .enter().append("g")
+      .attr("class", "box")
+      .attr("width",
+        self.c.width + self.c.margin.left + self.c.margin.right)
+      .attr("height",
+        self.c.height + self.c.margin.bottom + self.c.margin.top)
+      .call(chart)
         
-    )
+    #)
     
 
   init: (conf) ->
@@ -98,11 +88,13 @@ class boxChart
       margin: top: 10, right: 20, bottom: 20, left: 20
       axis: yes
       sub_ticks: no
+      dataset: {data:[[0]],min:0,max:0}
     c.height = 500 - c.margin.top - c.margin.bottom
     c.width = 100 - c.margin.left - c.margin.right
     @c = $.extend(yes, c, conf)
 
-    box = (g) -> 
+    box = (g) ->
+      console.log 'box', g
       g.each( (d, i) ->
         # create a box plot for each data group
         @g = d3.select(@)
@@ -130,6 +122,11 @@ class boxChart
       return self.c.sub_ticks unless arguments.length
       self.c.sub_ticks = value
       box
+      
+    box.dataset = (value) ->
+      return self.c.dataset unless arguments.length
+      self.c.dataset = value
+      box
 
     return box  ## end of init function, returns a closure
     
@@ -148,10 +145,14 @@ class boxChart
       .call(yAxis)
       .attr("transform", "translate(#{self.c.margin.left * 2}, 
         #{self.c.margin.top})")
+       
+       
+  setXAxis: (self) ->
       
       
   setSpread: (self, d, i) ->
-    x = (self.c.margin.left + self.c.width) / 2
+    console.log d, i
+    x = self.c.width * (i) + (self.c.margin.left + self.c.width) / 2
     spread = @g.selectAll("line.spread")
       .data([[d3.min(d), d3.max(d)]])
     
@@ -184,7 +185,7 @@ class boxChart
     midspread.enter().append("svg:rect")
       .attr("class", "midspread")
       # the x attribute defines the left position of the rectangle
-      .attr("x", margin.left)
+      .attr("x", self.c.width * (i) + margin.left)
       # the y attribute defines the top position of the rectangle
       .attr("y", (d) -> self.y0(d[1]) )
       .attr("width", self.c.width - margin.left)
@@ -206,9 +207,9 @@ class boxChart
     # Note that self.y0 and self.y1 are d3.scale.linear() functions (take the median)
     line.enter().append("svg:line")
       .attr("class", "median")
-      .attr("x1", self.c.margin.left)
+      .attr("x1", self.c.width * (i) + self.c.margin.left)
       .attr("y1", self.y0)
-      .attr("x2", self.c.width)
+      .attr("x2", self.c.width * (i) + self.c.width)
       .attr("y2", self.y0)
     .transition()
       .duration(self.duration)

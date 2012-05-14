@@ -72,9 +72,9 @@ class boxChart
       .attr("class", "parent")
       .attr("width",
         self.c.width * dataset.data.length +
-        (self.c.margin.left + self.c.margin.right) * 2 )
+        (self.c.out_margin.left + self.c.out_margin.right) * 2 )
       .attr("height",
-        self.c.height + self.c.margin.bottom + self.c.margin.top)
+        self.c.height + self.c.out_margin.bottom + self.c.out_margin.top)
       .append("g")
 
     # Set the axis (common to all boxes).
@@ -84,7 +84,7 @@ class boxChart
     self.boxes = self.svg.append("g")
       .attr("class", "boxes")
       .attr("transform",
-        "translate(#{self.c.margin.left * 2}, #{self.c.margin.top})")
+        "translate(#{self.c.in_margin.left * 2}, #{self.c.in_margin.top})")
 
     # Individual boxes. Note the call to chart, a closure set as:
     #   box_chart = new boxChart(vis_id)
@@ -95,9 +95,9 @@ class boxChart
     .enter().append("g")
       .attr("class", "box")
       .attr("width",
-        self.c.width + self.c.margin.left + self.c.margin.right)
+        self.c.width + self.c.in_margin.left + self.c.in_margin.right)
       .attr("height",
-        self.c.height + self.c.margin.bottom + self.c.margin.top)
+        self.c.height + self.c.in_margin.bottom + self.c.in_margin.top)
       .call(chart)
       
       
@@ -106,19 +106,21 @@ class boxChart
     getData = (d, i) ->
       self.c.dataset.data[i]
     @setScales(self.c.dataset)
-    #if self.c.axis then self.setYAxis.call(@, self)
+    # Set the axis (common to all boxes).
+    if self.c.axis then self.updateYAxis.call(@, self)
     @b.datum(getData).call(chart)
     
 
   init: (conf) ->
     self = @
     c =
-      margin: top: 10, right: 20, bottom: 20, left: 20
+      out_margin: top: 10, right: 20, bottom: 20, left: 20
+      in_margin: top: 10, right: 20, bottom: 20, left: 20
       axis: yes
       sub_ticks: no
       dataset: {data:[[0]],min:0,max:0}
-    c.height = 500 - c.margin.top - c.margin.bottom
-    c.width = 100 - c.margin.left - c.margin.right
+    c.height = 500 - c.in_margin.top - c.in_margin.bottom
+    c.width = 100 - c.in_margin.left - c.in_margin.right
     @c = $.extend(yes, c, conf)
 
     box = (g) ->
@@ -130,14 +132,24 @@ class boxChart
         self.setMedian.call(@, self, d, i)
       )
         
+    box.in_margin = (value) ->
+      return self.c.in_margin unless arguments.length
+      self.c.in_margin = value
+      box
+      
+    box.out_margin = (value) ->
+      return self.c.out_margin unless arguments.length
+      self.c.out_margin = value
+      box
+    
     box.width = (value) ->
       return self.c.width unless arguments.length
-      self.c.width = value - c.margin.left - c.margin.right
+      self.c.width = value - c.in_margin.left - c.in_margin.right
       box
       
     box.height = (value) ->
       return self.c.height unless arguments.length
-      self.c.height = value - c.margin.top - c.margin.bottom
+      self.c.height = value - c.in_margin.top - c.in_margin.bottom
       box
       
     box.axis = (value) ->
@@ -158,27 +170,35 @@ class boxChart
     return box  ## end of init function, returns a closure
     
 
-  setYAxis: (self) ->
-    sub_ticks = if self.c.sub_ticks then 1 else 0
-  
-    yAxis = d3.svg.axis()
-      .scale(self.y1)
+  yAxisGenerator: () ->
+    sub_ticks = if @c.sub_ticks then 1 else 0 
+    d3.svg.axis()
+      .scale(@y1)
       .orient("left")
       .tickSubdivide(sub_ticks)
       .tickSize(6, 3, 0) # sets major to 6, minor to 3, and end to 0
-
+  
+  
+  setYAxis: (self) -> 
+    yAxis = self.yAxisGenerator.call(self)
     self.svg.append("g")
       .attr("class", "y axis")
       .call(yAxis)
-      .attr("transform", "translate(#{self.c.margin.left * 2}, 
-        #{self.c.margin.top})")
+      .attr("transform", "translate(#{self.c.out_margin.left * 2}, 
+        #{self.c.out_margin.top})")
+        
+        
+  updateYAxis: (self) -> 
+    yAxis = self.yAxisGenerator.call(self)
+    t = self.svg.transition().duration(self.duration)
+    t.select(".y.axis").call(yAxis)
        
        
   setXAxis: (self) ->
       
       
   setSpread: (self, d, i) ->
-    x = self.c.width * (i) + (self.c.margin.left + self.c.width) / 2
+    x = self.c.width * (i) + (self.c.in_margin.left + self.c.width) / 2 + self.c.out_margin.left
     spread = @g.selectAll("line.spread")
       .data([[d3.min(d), d3.max(d)]])
     
@@ -200,7 +220,7 @@ class boxChart
       
     
   setMidspread: (self, d, i) ->
-    margin = self.c.margin
+    margin = self.c.in_margin
     mid_data = []
     mid_data.push(self.boxQuartiles(d)[0])
     mid_data.push(self.boxQuartiles(d)[2])  # highest value (top)
@@ -210,7 +230,7 @@ class boxChart
     midspread.enter().append("svg:rect")
       .attr("class", "midspread")
       # the x attribute defines the left position of the rectangle
-      .attr("x", self.c.width * (i) + margin.left)
+      .attr("x", self.c.width * (i) + margin.left + self.c.out_margin.left)
       # the y attribute defines the top position of the rectangle
       .attr("y", (d) -> self.y0(d[1]) )
       .attr("width", self.c.width - margin.left)
@@ -234,9 +254,9 @@ class boxChart
     # Note that self.y0 and self.y1 are d3.scale.linear() functions (take the median)
     line.enter().append("svg:line")
       .attr("class", "median")
-      .attr("x1", self.c.width * (i) + self.c.margin.left)
+      .attr("x1", self.c.width * (i) + self.c.in_margin.left + self.c.out_margin.left)
       .attr("y1", self.y0)
-      .attr("x2", self.c.width * (i) + self.c.width)
+      .attr("x2", self.c.width * (i) + self.c.width + self.c.out_margin.left)
       .attr("y2", self.y0)
     .transition()
       .duration(self.duration)

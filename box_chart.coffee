@@ -1,5 +1,5 @@
 
-class boxChart
+class BoxChart
 
   # conventions:
   #  throughout the code c stands for configuration
@@ -20,8 +20,6 @@ class boxChart
   
   constructor: (vis_id) ->
     @vis_id = vis_id
-#    @min = Infinity
-#    @max = -Infinity
     @duration = 1000
     
     
@@ -31,13 +29,13 @@ class boxChart
     self.y1 = d3.scale.linear()
       # range inverted because svg y positions are counted from top to bottom
       .domain([dataset.min, dataset.max])  # input
-      .range([self.c.height, 0])     # output 
+      .rangeRound([self.c.height, 0])     # output 
 
     # Retrieve the old y-scale, if this is an update.
     self.y0 = self.__chart__ || d3.scale.linear()
       # input inverted because svg y positions are counted from top to bottom
       .domain([0, Infinity])   # input
-      .range(self.y1.range())  # output 
+      .rangeRound(self.y1.range())  # output 
 
     # Stash the new y scale.
     self.__chart__ = self.y1
@@ -50,32 +48,18 @@ class boxChart
     dataset = self.c.dataset
     
     @setScales(dataset)
-    
-#    # Compute the new y-scale.
-#    self.y1 = d3.scale.linear()
-#      # range inverted because svg y positions are counted from top to bottom
-#      .domain([dataset.min, dataset.max])  # input
-#      .range([self.c.height, 0])     # output 
-#
-#    # Retrieve the old y-scale, if this is an update.
-#    self.y0 = self.__chart__ || d3.scale.linear()
-#      # input inverted because svg y positions are counted from top to bottom
-#      .domain([0, Infinity])   # input
-#      .range(self.y1.range())  # output 
-#
-#    # Stash the new y scale.
-#    self.__chart__ = self.y1
-
     # Set the parent svg, with a g element that wraps everything else.
     self.svg = d3.select("##{self.vis_id}")
       .append("svg")
       .attr("class", "parent")
-      .attr("width",
-        self.c.width * dataset.data.length +
-        (self.c.out_margin.left + self.c.out_margin.right) * 2 )
-      .attr("height",
-        self.c.height + self.c.out_margin.bottom + self.c.out_margin.top)
-      .append("g")
+      #.attr("width",
+      #  self.c.width * dataset.data.length +
+      #  (self.c.out_margin.left + self.c.out_margin.right) * 2 )
+      #.attr("height",
+      #  self.c.height + self.c.out_margin.bottom + self.c.out_margin.top)
+      #.append("g")
+      .attr("width", @c.width)
+      .attr("height", @c.height)
 
     # Set the axis (common to all boxes).
     if self.c.axis then self.setYAxis.call(@, self)
@@ -109,19 +93,52 @@ class boxChart
     # Set the axis (common to all boxes).
     if self.c.axis then self.updateYAxis.call(@, self)
     @b.datum(getData).call(chart)
+
+
+  extend: (o, p) ->
+    # copied from: https://github.com/davidflanagan/javascript6_examples/
+    for prop in p                         # For all props in p.
+        o[prop] = p[prop]                   # Add the property to o.
+    o
+
+
+  setBoxWidth: () ->
+    boxes = @c.dataset.data.length
+    inside_width = @c.width - @c.out_margin.left - @c.out_margin.right
+    out_box_width = Math.floor(inside_width / boxes) - @c.stroke_width * 2 - 1
+    inbox_width = out_box_width - @c.in_margin.left - @c.in_margin.right
+    if inbox_width < 0 then inbox_width = 1
+    #console.log boxes, @c.dataset
+    @box_width = 
+      out: out_box_width
+      in: inbox_width
+
     
 
   init: (conf) ->
     self = @
     c =
-      out_margin: top: 10, right: 20, bottom: 20, left: 20
-      in_margin: top: 10, right: 20, bottom: 20, left: 20
+      out_margin:
+        top: 10, right: 20, bottom: 20, left: 20
+      in_margin:
+        top: 10, right: 20, bottom: 20, left: 20
       axis: yes
       sub_ticks: no
-      dataset: {data:[[0]],min:0,max:0}
-    c.height = 500 - c.in_margin.top - c.in_margin.bottom
-    c.width = 100 - c.in_margin.left - c.in_margin.right
-    @c = $.extend(yes, c, conf)
+      dataset: 
+        data:[[0]], min:0, max:0
+      stroke_width: 1
+      #c.height = 500 - c.in_margin.top - c.in_margin.bottom
+      #c.width = 100 - c.in_margin.left - c.in_margin.right
+
+    #height and width refer to the outer container 
+    c.height = 500
+    c.width = 600
+    if conf
+      @c = @extend(c, conf) 
+    else 
+      @c = c
+
+    @setBoxWidth()
 
     box = (g) ->
       g.each( (d, i) ->
@@ -144,12 +161,12 @@ class boxChart
     
     box.width = (value) ->
       return self.c.width unless arguments.length
-      self.c.width = value - c.in_margin.left - c.in_margin.right
+      self.c.width = value #- c.in_margin.left - c.in_margin.right
       box
       
     box.height = (value) ->
       return self.c.height unless arguments.length
-      self.c.height = value - c.in_margin.top - c.in_margin.bottom
+      self.c.height = value #- c.in_margin.top - c.in_margin.bottom
       box
       
     box.axis = (value) ->
@@ -165,6 +182,12 @@ class boxChart
     box.dataset = (value) ->
       return self.c.dataset unless arguments.length
       self.c.dataset = value
+      self.setBoxWidth()
+      box
+
+    box.stroke_width = (value) ->
+      return self.c.stroke_width unless arguments.length
+      self.c.stroke_width = value
       box
 
     return box  ## end of init function, returns a closure
@@ -195,15 +218,27 @@ class boxChart
        
        
   setXAxis: (self) ->
+
+
+  getMidBoxPos: (i) =>
+    w = @box_width.out
+    Math.floor( @c.out_margin.left + (w * (i + 1) ) - (w / 2) )
+
+
+  getLeftBoxPos: (i) =>
+    w = @box_width.out
+    Math.floor( @c.out_margin.left + (w * i) + @c.in_margin.left )
+
       
       
   setSpread: (self, d, i) ->
-    x = self.c.width * (i) + (self.c.in_margin.left + self.c.width) / 2 + self.c.out_margin.left
+    x = self.getMidBoxPos(i)
     spread = @g.selectAll("line.spread")
       .data([[d3.min(d), d3.max(d)]])
     
     spread.enter().append("svg:line")
-      .attr("class", "spread")
+      .attr("class", "spread")      
+      .style("stroke-width", self.c.stroke_width)
       .attr("x1", x)
       .attr("y1", (d) -> self.y0(d[0]))
       .attr("x2", x)
@@ -220,7 +255,7 @@ class boxChart
       
     
   setMidspread: (self, d, i) ->
-    margin = self.c.in_margin
+    x = self.getLeftBoxPos(i)
     mid_data = []
     mid_data.push(self.boxQuartiles(d)[0])
     mid_data.push(self.boxQuartiles(d)[2])  # highest value (top)
@@ -229,11 +264,12 @@ class boxChart
     
     midspread.enter().append("svg:rect")
       .attr("class", "midspread")
+      .style("stroke-width", self.c.stroke_width)
       # the x attribute defines the left position of the rectangle
-      .attr("x", self.c.width * (i) + margin.left + self.c.out_margin.left)
+      .attr( "x", x)
       # the y attribute defines the top position of the rectangle
       .attr("y", (d) -> self.y0(d[1]) )
-      .attr("width", self.c.width - margin.left)
+      .attr( "width", self.box_width.in )
       .attr("height", (d) -> self.y0(d[0]) - self.y0(d[1]) )
     .transition()
       .duration(self.duration)
@@ -247,6 +283,7 @@ class boxChart
   
   
   setMedian: (self, d, i) ->
+    x1 =  self.getLeftBoxPos(i)
     median = self.boxQuartiles(d)[1]
     line = @g.selectAll("line.median")
       .data([median])
@@ -254,9 +291,10 @@ class boxChart
     # Note that self.y0 and self.y1 are d3.scale.linear() functions (take the median)
     line.enter().append("svg:line")
       .attr("class", "median")
-      .attr("x1", self.c.width * (i) + self.c.in_margin.left + self.c.out_margin.left)
+      .style("stroke-width", self.c.stroke_width)
+      .attr( "x1", x1)
       .attr("y1", self.y0)
-      .attr("x2", self.c.width * (i) + self.c.width + self.c.out_margin.left)
+      .attr( "x2", x1 + self.box_width.in )
       .attr("y2", self.y0)
     .transition()
       .duration(self.duration)
@@ -278,8 +316,6 @@ class boxChart
 
 
       
-try
-  module.exports = boxChart
-catch error
+module.exports = BoxChart
 
   

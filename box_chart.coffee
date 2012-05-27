@@ -25,11 +25,13 @@ class BoxChart
     
   setScales: (dataset) ->
     self = @
+    margin_bottom = self.c.out_margin.bottom + self.c.in_margin.bottom
+    margin_top = self.c.out_margin.top + self.c.in_margin.top
     # Compute the new y-scale.
     self.y1 = d3.scale.linear()
       # range inverted because svg y positions are counted from top to bottom
       .domain([dataset.min, dataset.max])  # input
-      .rangeRound([self.c.height, 0])     # output 
+      .rangeRound([self.c.height - margin_bottom - margin_top, 0])     # output 
 
     # Retrieve the old y-scale, if this is an update.
     self.y0 = self.__chart__ || d3.scale.linear()
@@ -49,6 +51,8 @@ class BoxChart
     
     @setScales(dataset)
     # Set the parent svg, with a g element that wraps everything else.
+    # h_margin = self.c.out_margin.left + self.c.out_margin.right
+    # v_margin = self.c.out_margin.bottom + self.c.out_margin.top
     self.svg = d3.select("##{self.vis_id}")
       .append("svg")
       .attr("class", "parent")
@@ -108,12 +112,14 @@ class BoxChart
     out_box_width = Math.floor(inside_width / boxes) - @c.stroke_width * 2 - 1
     inbox_width = out_box_width - @c.in_margin.left - @c.in_margin.right
     if inbox_width < 0 then inbox_width = 1
-    #console.log boxes, @c.dataset
     @box_width = 
       out: out_box_width
       in: inbox_width
 
-    
+
+   getVerticalDelta: () ->
+      @c.out_margin.top + @c.in_margin.top
+
 
   init: (conf) ->
     self = @
@@ -124,7 +130,7 @@ class BoxChart
         top: 10, right: 20, bottom: 20, left: 20
       axis: yes
       sub_ticks: no
-      dataset: 
+      dataset:
         data:[[0]], min:0, max:0
       stroke_width: 1
       #c.height = 500 - c.in_margin.top - c.in_margin.bottom
@@ -139,6 +145,7 @@ class BoxChart
       @c = c
 
     @setBoxWidth()
+    #@setVerticalDelta()
 
     box = (g) ->
       g.each( (d, i) ->
@@ -207,8 +214,8 @@ class BoxChart
     self.svg.append("g")
       .attr("class", "y axis")
       .call(yAxis)
-      .attr("transform", "translate(#{self.c.out_margin.left * 2}, 
-        #{self.c.out_margin.top})")
+      .attr("transform", "translate(#{self.c.out_margin.left * 1}, 
+          #{self.c.out_margin.top + self.c.in_margin.top})")
         
         
   updateYAxis: (self) -> 
@@ -220,19 +227,24 @@ class BoxChart
   setXAxis: (self) ->
 
 
-  getMidBoxPos: (i) =>
+  getXMidBoxPos: (i) =>
     w = @box_width.out
     Math.floor( @c.out_margin.left + (w * (i + 1) ) - (w / 2) )
 
 
-  getLeftBoxPos: (i) =>
+  getXLeftBoxPos: (i) =>
     w = @box_width.out
     Math.floor( @c.out_margin.left + (w * i) + @c.in_margin.left )
+
+
+  getTopBoxPos: () =>
+        
 
       
       
   setSpread: (self, d, i) ->
-    x = self.getMidBoxPos(i)
+    delta = self.getVerticalDelta()
+    x = self.getXMidBoxPos(i)
     spread = @g.selectAll("line.spread")
       .data([[d3.min(d), d3.max(d)]])
     
@@ -240,22 +252,23 @@ class BoxChart
       .attr("class", "spread")      
       .style("stroke-width", self.c.stroke_width)
       .attr("x1", x)
-      .attr("y1", (d) -> self.y0(d[0]))
+      .attr("y1", (d) -> self.y0(d[0]) + delta )
       .attr("x2", x)
-      .attr("y2", (d) -> self.y0(d[1]))
+      .attr("y2", (d) -> self.y0(d[1]) + delta )
     .transition()
       .duration(self.duration)
-      .attr("y1", (d) -> self.y1(d[0]))
-      .attr("y2", (d) -> self.y1(d[1]))
+      .attr("y1", (d) -> self.y1(d[0]) + delta)
+      .attr("y2", (d) -> self.y1(d[1]) + delta)
     
     spread.transition()
       .duration(self.duration)
-      .attr("y1", (d) -> self.y1(d[0]))
-      .attr("y2", (d) -> self.y1(d[1]))
+      .attr("y1", (d) -> self.y1(d[0]) + delta)
+      .attr("y2", (d) -> self.y1(d[1]) + delta)
       
     
   setMidspread: (self, d, i) ->
-    x = self.getLeftBoxPos(i)
+    delta = self.getVerticalDelta()
+    x = self.getXLeftBoxPos(i)
     mid_data = []
     mid_data.push(self.boxQuartiles(d)[0])
     mid_data.push(self.boxQuartiles(d)[2])  # highest value (top)
@@ -268,22 +281,23 @@ class BoxChart
       # the x attribute defines the left position of the rectangle
       .attr( "x", x)
       # the y attribute defines the top position of the rectangle
-      .attr("y", (d) -> self.y0(d[1]) )
+      .attr("y", (d) -> self.y0(d[1]) + delta )
       .attr( "width", self.box_width.in )
       .attr("height", (d) -> self.y0(d[0]) - self.y0(d[1]) )
     .transition()
       .duration(self.duration)
-      .attr("y", (d) -> self.y1(d[1]) )
+      .attr("y", (d) -> self.y1(d[1]) + delta )
       .attr("height", (d) -> self.y1(d[0]) - self.y1(d[1]) )
       
     midspread.transition(self.duration)
       .duration(self.duration)
-      .attr("y", (d) -> self.y1(d[1]) )
+      .attr("y", (d) -> self.y1(d[1]) + delta )
       .attr("height", (d) -> self.y1(d[0]) - self.y1(d[1]) )
   
   
-  setMedian: (self, d, i) ->
-    x1 =  self.getLeftBoxPos(i)
+  setMedian: (self, d, i) ->    
+    delta = self.getVerticalDelta()
+    x1 =  self.getXLeftBoxPos(i)
     median = self.boxQuartiles(d)[1]
     line = @g.selectAll("line.median")
       .data([median])
@@ -293,18 +307,18 @@ class BoxChart
       .attr("class", "median")
       .style("stroke-width", self.c.stroke_width)
       .attr( "x1", x1)
-      .attr("y1", self.y0)
+      .attr("y1", (d) -> self.y0(d) + delta )
       .attr( "x2", x1 + self.box_width.in )
-      .attr("y2", self.y0)
+      .attr("y2", (d) -> self.y0(d) + delta )
     .transition()
       .duration(self.duration)
-      .attr("y1", self.y1)
-      .attr("y2", self.y1)
+      .attr("y1", (d) -> self.y1(d) + delta )
+      .attr("y2", (d) -> self.y1(d) + delta )
     
     line.transition()
       .duration(self.duration)
-      .attr("y1", self.y1)
-      .attr("y2", self.y1)
+      .attr("y1", (d) -> self.y1(d) + delta )
+      .attr("y2", (d) -> self.y1(d) + delta )
       
       
   boxQuartiles: (d) ->
@@ -313,9 +327,5 @@ class BoxChart
       d3.quantile(d, .5),
       d3.quantile(d, .75)
     ]
-
-
-      
-module.exports = BoxChart
 
   

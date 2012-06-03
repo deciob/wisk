@@ -87,7 +87,9 @@ class BoxChart
     @b.datum(getData).call(chart)
 
 
-  init: (conf) ->
+  init: (conf) ->  
+    # returnes box
+  
     self = @
     
     # default configuration, only dataset is required, because defaults to 0

@@ -1,0 +1,49 @@
+<html>
+<head>
+  <meta charset=utf-8>
+  <title>Wisk, a box chart generator</title>
+<style type="text/css">
+  .box { font: 10px sans-serif; }
+  .box line, .box rect, .box circle { 
+    stroke: #2C72C7; stroke-width: 1.5px; fill: #fff; 
+  }
+  .box .center { stroke-dasharray: 3 3; }
+  .box .outlier { stroke: #A4C0E4; fill: none; }
+  .axis line, .axis path {
+    fill: none;
+    stroke: #666;
+    shape-rendering: crispEdges;
+  }
+  .y {
+    fill: #888888;
+  }
+</style>
+
+  <script src="examples/data/sample_data.js" type="text/javascript" charset="utf-8"></script>
+  <script src="dist/wisk-rjs.js" type="text/javascript" charset="utf-8"></script>
+  <script type="text/javascript" charset="utf-8">
+
+    require(['wisk'], function (Wisk) {
+
+      var wisk = new Wisk("box_chart"),
+          dataset = sample_data,
+          chart;
+
+      chart = wisk.init()
+        .out_margin({top: 150, right: 20, bottom: 20, left: 40})
+        .in_margin({top: 0, right: 10, bottom: 0, left: 10})
+        .axis(true)
+        .subTicks(true)
+        .height(400)
+        .width(600)
+        .dataset(dataset);
+      wisk.draw(chart);
+
+    });
+
+</script>
+</head>
+<body>
+  <div id="box_chart"></div>
+</body>
+</html>

@@ -1,4 +1,4 @@
-(function () {
+
 /**
  * almond 0.1.4 Copyright (c) 2011, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
@@ -7381,10 +7381,10 @@ var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments)
 define('wisk',[], function() {
   
 
-  var BoxChart;
-  return BoxChart = (function() {
+  var Wisk;
+  return Wisk = (function() {
 
-    function BoxChart(vis_id) {
+    function Wisk(vis_id) {
       this.getTopBoxPos = __bind(this.getTopBoxPos, this);
 
       this.getXLeftBoxPos = __bind(this.getXLeftBoxPos, this);
@@ -7394,7 +7394,7 @@ define('wisk',[], function() {
       this.duration = 1000;
     }
 
-    BoxChart.prototype.draw = function(chart) {
+    Wisk.prototype.draw = function(chart) {
       var dataset, self;
       self = this;
       dataset = self.c.dataset;
@@ -7407,7 +7407,7 @@ define('wisk',[], function() {
       return self.b = self.boxes.selectAll("g.box").data(dataset.data).enter().append("g").attr("class", "box").attr("width", self.c.width + self.c.in_margin.left + self.c.in_margin.right).attr("height", self.c.height + self.c.in_margin.bottom + self.c.in_margin.top).call(chart);
     };
 
-    BoxChart.prototype.update = function(chart) {
+    Wisk.prototype.update = function(chart) {
       var getData, self;
       self = this;
       getData = function(d, i) {
@@ -7420,7 +7420,7 @@ define('wisk',[], function() {
       return this.b.datum(getData).call(chart);
     };
 
-    BoxChart.prototype.init = function(conf) {
+    Wisk.prototype.init = function(conf) {
       var box, c, self;
       self = this;
       c = {
@@ -7521,7 +7521,7 @@ define('wisk',[], function() {
       return box;
     };
 
-    BoxChart.prototype.setSpread = function(self, d, i) {
+    Wisk.prototype.setSpread = function(self, d, i) {
       var delta, spread, x;
       delta = self.getVerticalDelta();
       x = self.getXMidBoxPos(i);
@@ -7542,7 +7542,7 @@ define('wisk',[], function() {
       });
     };
 
-    BoxChart.prototype.setMidspread = function(self, d, i) {
+    Wisk.prototype.setMidspread = function(self, d, i) {
       var delta, mid_data, midspread, x;
       delta = self.getVerticalDelta();
       x = self.getXLeftBoxPos(i);
@@ -7566,7 +7566,7 @@ define('wisk',[], function() {
       });
     };
 
-    BoxChart.prototype.setMedian = function(self, d, i) {
+    Wisk.prototype.setMedian = function(self, d, i) {
       var delta, line, median, x1;
       delta = self.getVerticalDelta();
       x1 = self.getXLeftBoxPos(i);
@@ -7588,13 +7588,13 @@ define('wisk',[], function() {
       });
     };
 
-    BoxChart.prototype.setYAxis = function(self) {
+    Wisk.prototype.setYAxis = function(self) {
       var yAxis;
       yAxis = self.yAxisGenerator.call(self);
       return self.svg.append("g").attr("class", "y axis").call(yAxis).attr("transform", "translate(" + (self.c.out_margin.left * 1) + ",               " + (self.c.out_margin.top + self.c.in_margin.top) + ")");
     };
 
-    BoxChart.prototype.updateYAxis = function(self) {
+    Wisk.prototype.updateYAxis = function(self) {
       var t, yAxis;
       yAxis = self.yAxisGenerator.call(self);
       t = self.svg.transition().duration(self.duration);
@@ -7605,7 +7605,7 @@ define('wisk',[], function() {
     */
 
 
-    BoxChart.prototype.extend = function(o, p) {
+    Wisk.prototype.extend = function(o, p) {
       var prop, _i, _len;
       for (_i = 0, _len = p.length; _i < _len; _i++) {
         prop = p[_i];
@@ -7614,7 +7614,7 @@ define('wisk',[], function() {
       return o;
     };
 
-    BoxChart.prototype.setScales = function(dataset) {
+    Wisk.prototype.setScales = function(dataset) {
       var margin_bottom, margin_top, self;
       self = this;
       margin_bottom = self.c.out_margin.bottom + self.c.in_margin.bottom;
@@ -7624,13 +7624,13 @@ define('wisk',[], function() {
       return this.__chart__ = this.y1;
     };
 
-    BoxChart.prototype.yAxisGenerator = function() {
+    Wisk.prototype.yAxisGenerator = function() {
       var sub_ticks;
       sub_ticks = this.c.sub_ticks ? 1 : 0;
       return d3.svg.axis().scale(this.y1).orient("left").tickSubdivide(sub_ticks).tickSize(6, 3, 0);
     };
 
-    BoxChart.prototype.setBoxWidth = function() {
+    Wisk.prototype.setBoxWidth = function() {
       var boxes, inbox_width, inside_width, out_box_width;
       boxes = this.c.dataset.data.length;
       inside_width = this.c.width - this.c.out_margin.left - this.c.out_margin.right;
@@ -7645,34 +7645,31 @@ define('wisk',[], function() {
       };
     };
 
-    BoxChart.prototype.getVerticalDelta = function() {
+    Wisk.prototype.getVerticalDelta = function() {
       return this.c.out_margin.top + this.c.in_margin.top;
     };
 
-    BoxChart.prototype.setXAxis = function(self) {};
+    Wisk.prototype.setXAxis = function(self) {};
 
-    BoxChart.prototype.getXMidBoxPos = function(i) {
+    Wisk.prototype.getXMidBoxPos = function(i) {
       var w;
       w = this.box_width.out;
       return Math.floor(this.c.out_margin.left + (w * (i + 1)) - (w / 2));
     };
 
-    BoxChart.prototype.getXLeftBoxPos = function(i) {
+    Wisk.prototype.getXLeftBoxPos = function(i) {
       var w;
       w = this.box_width.out;
       return Math.floor(this.c.out_margin.left + (w * i) + this.c.in_margin.left);
     };
 
-    BoxChart.prototype.getTopBoxPos = function() {};
+    Wisk.prototype.getTopBoxPos = function() {};
 
-    BoxChart.prototype.boxQuartiles = function(d) {
+    Wisk.prototype.boxQuartiles = function(d) {
       return [d3.quantile(d, .25), d3.quantile(d, .5), d3.quantile(d, .75)];
     };
 
-    return BoxChart;
+    return Wisk;
 
   })();
 });
-
-require(["wisk"]);
-}());

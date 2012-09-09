@@ -18,7 +18,7 @@
     baseUrl: '../js',                         
     name: 'vendor/almond',
     include: ['vendor/d3.v2', 'wisk'],
-    insertRequire: ['wisk'],
+    //insertRequire: ['wisk'],
     //out: '../dist/wisk-built.js',
-    wrap: true
+    //wrap: true
 })

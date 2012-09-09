@@ -4,37 +4,44 @@
   <title>App</title>
 <style type="text/css">
   .box { font: 10px sans-serif; }
-  .box line, .box rect, .box circle { stroke: #000; stroke-width: 1.5px; fill: #fff; }
+  .box line, .box rect, .box circle { 
+    stroke: #2C72C7; stroke-width: 1.5px; fill: #fff; 
+  }
   .box .center { stroke-dasharray: 3 3; }
-  .box .outlier { stroke: #ccc; fill: none; }
+  .box .outlier { stroke: #A4C0E4; fill: none; }
   .axis line, .axis path {
     fill: none;
     stroke: #666;
     shape-rendering: crispEdges;
   }
+  .y {
+    fill: #888888;
+  }
 </style>
 
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
-  <script type="text/javascript" src="http://mbostock.github.com/d3/d3.js?2.3.0"></script>
-  <script src="../data/sample_data.js" type="text/javascript" charset="utf-8"></script>
-  <script src="../src/box_chart.js" type="text/javascript" charset="utf-8"></script>
+  <script src="data/sample_data.js" type="text/javascript" charset="utf-8"></script>
+  <script src="../dist/wisk-rjs.js" type="text/javascript" charset="utf-8"></script>
   <script type="text/javascript" charset="utf-8">
-    $(document).ready(function() { 
 
-    var box_chart = new BoxChart("box_chart");
-    var dataset = sample_data;
-    var chart = box_chart.init()
-      .out_margin({top: 150, right: 20, bottom: 20, left: 40})
-      .in_margin({top: 0, right: 10, bottom: 0, left: 10})
-      .axis(true)
-      .subTicks(true)
-      .height(400)
-      .width(600)
-      .dataset(dataset);
-    box_chart.draw(chart);
+    require(['wisk'], function (Wisk) {
 
-});
-  </script>
+      var wisk = new Wisk("box_chart"),
+          dataset = sample_data,
+          chart;
+
+      chart = wisk.init()
+        .out_margin({top: 150, right: 20, bottom: 20, left: 40})
+        .in_margin({top: 0, right: 10, bottom: 0, left: 10})
+        .axis(true)
+        .subTicks(true)
+        .height(400)
+        .width(600)
+        .dataset(dataset);
+      wisk.draw(chart);
+
+    });
+
+</script>
 </head>
 <body>
   <div id="box_chart"></div>

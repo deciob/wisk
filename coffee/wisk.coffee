@@ -2,7 +2,7 @@ define [], () ->
     'use strict'
 
 
-    class BoxChart
+    class Wisk
     
       # Inspired by:
       # -- "Show me the numbers" by Stephen Few
@@ -13,7 +13,7 @@ define [], () ->
       #   c == configuration
       
       # typical implementation
-      #    box_chart = new BoxChart("box_chart")
+      #    box_chart = new Wisk("box_chart")
       #    dataset = sample_data
       #    chart = box_chart.init()
       #      .out_margin(

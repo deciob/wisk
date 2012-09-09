@@ -1,0 +1,7 @@
+{
+  "name": "wisk",
+  "version": "0.0.1",
+  "dependencies": { 
+    "requirejs": "~2.0.6"
+  }
+}

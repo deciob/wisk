@@ -42,7 +42,7 @@ class Wisk
   
   constructor: (vis_id) ->
     @vis_id = vis_id
-    @duration = 1000
+    #@duration = 1000
     
   
   draw: (chart) ->
@@ -105,16 +105,19 @@ class Wisk
       dataset:
         data:[[0]], min:0, max:0
       stroke_width: 1
+      duration: 1000  # animation millisecs
 
     # height and width refer to the outer container 
     c.height = 500
     c.width = 600
+
     if conf
       @c = @extend(c, conf) 
     else 
       @c = c
 
-    @setBoxWidth()
+    #console.log "@setBoxWidth() 1"
+    #@setBoxWidth()
 
     box = (g) ->
       g.each( (d, i) ->
@@ -158,6 +161,7 @@ class Wisk
     box.dataset = (value) ->
       return self.c.dataset unless arguments.length
       self.c.dataset = value
+      # set the box width once you know about the dataset (how many boxes?)
       self.setBoxWidth()
       box
 
@@ -183,12 +187,12 @@ class Wisk
       .attr("x2", x)
       .attr("y2", (d) -> self.y0(d[1]) + delta )
     .transition()
-      .duration(self.duration)
+      .duration(self.c.duration)
       .attr("y1", (d) -> self.y1(d[0]) + delta)
       .attr("y2", (d) -> self.y1(d[1]) + delta)
     
     spread.transition()
-      .duration(self.duration)
+      .duration(self.c.duration)
       .attr("y1", (d) -> self.y1(d[0]) + delta)
       .attr("y2", (d) -> self.y1(d[1]) + delta)
       
@@ -212,12 +216,12 @@ class Wisk
       .attr( "width", self.box_width.in )
       .attr("height", (d) -> self.y0(d[0]) - self.y0(d[1]) )
     .transition()
-      .duration(self.duration)
+      .duration(self.c.duration)
       .attr("y", (d) -> self.y1(d[1]) + delta )
       .attr("height", (d) -> self.y1(d[0]) - self.y1(d[1]) )
       
-    midspread.transition(self.duration)
-      .duration(self.duration)
+    midspread.transition(self.c.duration)
+      .duration(self.c.duration)
       .attr("y", (d) -> self.y1(d[1]) + delta )
       .attr("height", (d) -> self.y1(d[0]) - self.y1(d[1]) )
   
@@ -237,12 +241,12 @@ class Wisk
       .attr( "x2", x1 + self.box_width.in )
       .attr("y2", (d) -> self.y0(d) + delta )
     .transition()
-      .duration(self.duration)
+      .duration(self.c.duration)
       .attr("y1", (d) -> self.y1(d) + delta )
       .attr("y2", (d) -> self.y1(d) + delta )
     
     line.transition()
-      .duration(self.duration)
+      .duration(self.c.duration)
       .attr("y1", (d) -> self.y1(d) + delta )
       .attr("y2", (d) -> self.y1(d) + delta )
       
@@ -258,7 +262,7 @@ class Wisk
         
   updateYAxis: (self) -> 
     yAxis = self.yAxisGenerator.call(self)
-    t = self.svg.transition().duration(self.duration)
+    t = self.svg.transition().duration(self.c.duration)
     t.select(".y.axis").call(yAxis)
 
 
@@ -298,7 +302,7 @@ class Wisk
       .tickSubdivide(sub_ticks)
       .tickSize(6, 3, 0) # sets major to 6, minor to 3, and end to 0
        
-       
+
   setBoxWidth: () ->
     boxes = @c.dataset.data.length
     inside_width = @c.width - @c.out_margin.left - @c.out_margin.right

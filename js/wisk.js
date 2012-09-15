@@ -13,7 +13,6 @@ Wisk = (function() {
 
     this.getXMidBoxPos = __bind(this.getXMidBoxPos, this);
     this.vis_id = vis_id;
-    this.duration = 1000;
   }
 
   Wisk.prototype.draw = function(chart) {
@@ -65,7 +64,8 @@ Wisk = (function() {
         min: 0,
         max: 0
       },
-      stroke_width: 1
+      stroke_width: 1,
+      duration: 1000
     };
     c.height = 500;
     c.width = 600;
@@ -74,7 +74,6 @@ Wisk = (function() {
     } else {
       this.c = c;
     }
-    this.setBoxWidth();
     box = function(g) {
       return g.each(function(d, i) {
         this.g = d3.select(this);
@@ -152,12 +151,12 @@ Wisk = (function() {
       return self.y0(d[0]) + delta;
     }).attr("x2", x).attr("y2", function(d) {
       return self.y0(d[1]) + delta;
-    }).transition().duration(self.duration).attr("y1", function(d) {
+    }).transition().duration(self.c.duration).attr("y1", function(d) {
       return self.y1(d[0]) + delta;
     }).attr("y2", function(d) {
       return self.y1(d[1]) + delta;
     });
-    return spread.transition().duration(self.duration).attr("y1", function(d) {
+    return spread.transition().duration(self.c.duration).attr("y1", function(d) {
       return self.y1(d[0]) + delta;
     }).attr("y2", function(d) {
       return self.y1(d[1]) + delta;
@@ -176,12 +175,12 @@ Wisk = (function() {
       return self.y0(d[1]) + delta;
     }).attr("width", self.box_width["in"]).attr("height", function(d) {
       return self.y0(d[0]) - self.y0(d[1]);
-    }).transition().duration(self.duration).attr("y", function(d) {
+    }).transition().duration(self.c.duration).attr("y", function(d) {
       return self.y1(d[1]) + delta;
     }).attr("height", function(d) {
       return self.y1(d[0]) - self.y1(d[1]);
     });
-    return midspread.transition(self.duration).duration(self.duration).attr("y", function(d) {
+    return midspread.transition(self.c.duration).duration(self.c.duration).attr("y", function(d) {
       return self.y1(d[1]) + delta;
     }).attr("height", function(d) {
       return self.y1(d[0]) - self.y1(d[1]);
@@ -198,12 +197,12 @@ Wisk = (function() {
       return self.y0(d) + delta;
     }).attr("x2", x1 + self.box_width["in"]).attr("y2", function(d) {
       return self.y0(d) + delta;
-    }).transition().duration(self.duration).attr("y1", function(d) {
+    }).transition().duration(self.c.duration).attr("y1", function(d) {
       return self.y1(d) + delta;
     }).attr("y2", function(d) {
       return self.y1(d) + delta;
     });
-    return line.transition().duration(self.duration).attr("y1", function(d) {
+    return line.transition().duration(self.c.duration).attr("y1", function(d) {
       return self.y1(d) + delta;
     }).attr("y2", function(d) {
       return self.y1(d) + delta;
@@ -219,7 +218,7 @@ Wisk = (function() {
   Wisk.prototype.updateYAxis = function(self) {
     var t, yAxis;
     yAxis = self.yAxisGenerator.call(self);
-    t = self.svg.transition().duration(self.duration);
+    t = self.svg.transition().duration(self.c.duration);
     return t.select(".y.axis").call(yAxis);
   };
 
@@ -255,6 +254,7 @@ Wisk = (function() {
   Wisk.prototype.setBoxWidth = function() {
     var boxes, inbox_width, inside_width, out_box_width;
     boxes = this.c.dataset.data.length;
+    console.log(boxes);
     inside_width = this.c.width - this.c.out_margin.left - this.c.out_margin.right;
     out_box_width = Math.floor(inside_width / boxes) - this.c.stroke_width * 2 - 1;
     inbox_width = out_box_width - this.c.in_margin.left - this.c.in_margin.right;

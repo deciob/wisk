@@ -8,6 +8,7 @@ config['browser-all'] = {
   libs: [
     'examples/data/sample_data.js',
     'js/vendor/require-2.0.4.js', 
+    'js/vendor/underscore-1.3.3.js',
     'js/vendor/d3.v2.js'
   ],
   sources: [

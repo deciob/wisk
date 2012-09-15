@@ -36,26 +36,31 @@ var initWisk = function (Wisk) {
 
 };
 
-var genRandomMargin = function () {
-    return Math.floor((Math.random()*200)+1);
+var genRandom = function (factor, base) {
+    var factor = factor || 60;
+    var base = base || 2;
+    return Math.floor((Math.random()*factor)+base);
 }
 
-var genRandomDimensions = function () {
-    var width = Math.floor((Math.random()*1000)+1);
-    var height = Math.floor((Math.random()*800)+1);
-    var margin = Math.floor((Math.random()*200)+1);
+var genRandomDimensions = function (boxes) {
+    //var width = Math.floor((Math.random()*1000)+1);
+    var height = genRandom(800, 200);
     var out_margin = {
-        top: genRandomMargin(),
-        right: genRandomMargin(), 
-        bottom: genRandomMargin(), 
-        left: genRandomMargin()
+        top: genRandom(),
+        right: genRandom(), 
+        bottom: genRandom(), 
+        left: genRandom()
     };
     var in_margin = {
-        top: genRandomMargin(),
-        right: genRandomMargin(), 
-        bottom: genRandomMargin(), 
-        left: genRandomMargin()
+        top: genRandom(),
+        right: genRandom(), 
+        bottom: genRandom(), 
+        left: genRandom()
     };
+    // width must depend on both the number of boxes and the margin values
+    var base = out_margin.right + out_margin.left + (in_margin.left * boxes) +
+      (in_margin.right * boxes) + 100;
+    width = genRandom(1000, base);
     return {
         w: width, 
         h: height, 
@@ -67,18 +72,20 @@ var genRandomDimensions = function () {
 
 
 describe("A module", function (run) {
-  require(['wisk'], function (wisk) {
+  require(['wisk'], function (Wisk) {
     run(function() {
 
       it("states the obvious", function () {
 
         var wisk = initWisk(Wisk),
         dataset = sample_data,
-        number_of_boxes = dataset.lenght,
+        boxes = dataset.data.length,
         chart;
 
+
+
         for (var i = 0; i < 100; i++) {
-            var d = genRandomDimensions();
+            var d = genRandomDimensions(boxes);
             chart = wisk.init()
               .out_margin({top: d.om.top, right: d.om.right, 
                 bottom: d.om.bottom, left: d.om.left})
@@ -110,3 +117,5 @@ describe("A module", function (run) {
     });
   });
 });
+
+

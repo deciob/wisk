@@ -219,10 +219,6 @@ define(['utils'], function(Utils) {
       return t.select(".y.axis").call(yAxis);
     };
 
-    /* HELPER FUNCTIONS
-    */
-
-
     return Wisk;
 
   })();

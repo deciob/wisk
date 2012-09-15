@@ -8442,8 +8442,7 @@ define("vendor/d3.v2", function(){});
 define('utils',[], function() {
   
 
-  var Utils,
-    _this = this;
+  var Utils;
   return Utils = {
     extend: function(o, p) {
       var prop, _i, _len;
@@ -8722,10 +8721,6 @@ define('wisk',['utils'], function(Utils) {
       t = self.svg.transition().duration(self.c.duration);
       return t.select(".y.axis").call(yAxis);
     };
-
-    /* HELPER FUNCTIONS
-    */
-
 
     return Wisk;
 

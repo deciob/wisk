@@ -3,8 +3,7 @@
 define([], function() {
   'use strict';
 
-  var Utils,
-    _this = this;
+  var Utils;
   return Utils = {
     extend: function(o, p) {
       var prop, _i, _len;

@@ -1,3 +1,9 @@
+require.config(
+  paths: 
+    "utils": "js/utils"
+)
+
+
 define [
   'utils'
 ], (Utils) ->
@@ -115,7 +121,7 @@ define [
       # height and width refer to the outer container 
       c.height = 500
       c.width = 600
-
+  
       @c = _.extend(c, conf)
   
       chart = (g) ->
@@ -168,7 +174,7 @@ define [
         return self.c.stroke_width unless arguments.length
         self.c.stroke_width = value
         chart
-
+  
       chart.duration = (value) ->
         return self.c.duration unless arguments.length
         self.c.duration = value
@@ -273,13 +279,13 @@ define [
 
   
   
-  #if typeof define is "function" and define.amd
-  #  define "Wisk", ['vendor/underscore-1.3.3', 'utils'
-  #  ], (_, Utils)->
-  #    debugger
-  #    _
-  #    Utils
-  #    Wisk
+#if typeof define is "function" and define.amd
+#  define "Wisk", ['utils'
+#  ], (Utils)->
+#    _(Wisk.prototype).extend Utils
+#    console.log('sssssssssssssssssssssssssssssssssssscccccccccccccc')
+#    Wisk
+
 
 
   

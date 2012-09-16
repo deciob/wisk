@@ -1,4 +1,28 @@
-buster.spec.expose(); // Make some functions global
+
+define(["js/wisk"], function(Wisk) {
+    buster.testCase("some test", {
+        //"test that fails" : function() {
+        //    assert.match(Wisk, {name: "wrong name"});
+        //},
+        "test that succeeds" : function() {
+            console.log('jjjj', Wisk)
+            assert.equals(true, true);
+        }
+    });
+});
+
+//require(['wisk'], function (Wisk) {
+
+
+
+
+/*
+
+
+//buster.spec.expose(); // Make some functions global
+
+var assert = buster.assertions.assert;
+var refute = buster.assertions.refute;
 
 require.config({
   baseUrl: 'js/' //MUST be the same as the modules you're testing
@@ -15,8 +39,8 @@ require.config({
 //  });
 //});
 
-var initWisk = function (Wisk) {
-    var wisk = new Wisk("box_chart");//,
+//var initWisk = function (Wisk) {
+//    var wisk = new Wisk("box_chart");//,
     //    dataset = sample_data,
     //    chart;
 
@@ -32,9 +56,9 @@ var initWisk = function (Wisk) {
 //
     //wisk.draw(chart);
 
-    return wisk;
+//    return wisk;
 
-};
+//};
 
 var genRandom = function (factor, base) {
     var factor = factor || 60;
@@ -70,52 +94,66 @@ var genRandomDimensions = function (boxes) {
 
 
 
+buster.testCase("Checking dimensions", {
+    setUp: function () {
+        console.log(1)
+        var self = this;
+        define(['wisk'], function (Wisk) {
+            console.log(2)
+            self.wisk = new Wisk("box_chart");
+            // sample_data is a global variable from 'examples/data/sample_data.js'
+            self.boxes = sample_data.data.length;
+            self.chart = self.wisk.init();
+            console.log(3);
+        });
+    },
+ 
+    "states the obvious 1": function () {
+         assert.equals(true, true);
+    },
 
-describe("A module", function (run) {
-  require(['wisk'], function (Wisk) {
-    run(function() {
-
-      it("states the obvious", function () {
-
-        var wisk = initWisk(Wisk),
-        dataset = sample_data,
-        boxes = dataset.data.length,
-        chart;
-
-
-
+    "states the obvious": function () {
+        define(['wisk'], function (Wisk) {
+        console.log(4);
         for (var i = 0; i < 100; i++) {
-            var d = genRandomDimensions(boxes);
-            chart = wisk.init()
+            var d = genRandomDimensions(self.boxes);
+            this.chart
               .out_margin({top: d.om.top, right: d.om.right, 
                 bottom: d.om.bottom, left: d.om.left})
               .in_margin({top: d.im.top, right: d.im.right, 
                 bottom: d.im.bottom, left: d.im.left})
               .height(d.h)
               .width(d.w)
-              .dataset(dataset);
-
-            //var box_width = wisk.setBoxWidth();
-            var case_a = wisk.box_width.in > 0;
-            var case_b = wisk.box_width.out > 0;
-            //var case_c = box_width.in > 0;
-            //var case_d = box_width.out > 0;
-            console.log(
-                "width: ", d.w, ", height: ", 
-                d.h, ", inner_margin: ", d.im, ", outer_margin: ", d.om);
-            console.log("wisk.box_width: ", wisk.box_width)
-            expect(true).toEqual(case_a);  
-            expect(true).toEqual(case_b);
-            //expect(true).toEqual(case_b);
-            //expect(true).toEqual(case_c);
-            //expect(true).toEqual(case_d);
+              .dataset(sample_data);
+            //assert.equals(true, this.wisk.box_width.in > 0);
+            //console.log(this.wisk.box_width.out, this.wisk.box_width.out > 0);
+            //assert.equals(true, this.wisk.box_width.out > 0);
+            assert.equals(true, true);
+            
         }
+        //assert.equals({ name: "Professor Chaos" }, { name: "Professor Chaos" }); // Passes
+        //assert.equals({ name: "Professor Chaos" }, { name: "Dr Evil" });         // Fails
+        assert.equals.message = "${0} expected to be equal to ${1}";
+    });
+    }
+});
 
-        
+
+
+describe("A module 3", function (run) {
+  console.log(5);
+  require(['wisk'], function (Wisk) {
+    console.log(6);
+    run(function() {
+
+      it("states the obvious", function () {
+
+        console.log(7);
+        assert.equals(true, true);
         
       });
     });
   });
 });
 
-
+*/

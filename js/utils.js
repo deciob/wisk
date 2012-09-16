@@ -5,26 +5,27 @@ define([], function() {
 
   var Utils;
   return Utils = {
-    extend: function(o, p) {
-      var prop, _i, _len;
-      for (_i = 0, _len = p.length; _i < _len; _i++) {
-        prop = p[_i];
-        o[prop] = p[prop];
-      }
-      return o;
+    getInChartWidth: function() {
+      return this.c.width - this.c.out_margin.left - this.c.out_margin.right;
+    },
+    getOutBoxWidth: function(in_chart_width, boxes) {
+      return Math.floor(in_chart_width / boxes) - this.c.stroke_width * 2 - 1;
+    },
+    getInBoxWidth: function(out_box_width) {
+      return out_box_width - this.c.in_margin.left - this.c.in_margin.right;
     },
     setBoxWidth: function() {
-      var boxes, inbox_width, inside_width, out_box_width;
+      var boxes, in_box_width, in_chart_width, out_box_width;
       boxes = this.c.dataset.data.length;
-      inside_width = this.c.width - this.c.out_margin.left - this.c.out_margin.right;
-      out_box_width = Math.floor(inside_width / boxes) - this.c.stroke_width * 2 - 1;
-      inbox_width = out_box_width - this.c.in_margin.left - this.c.in_margin.right;
-      if (inbox_width < 0) {
-        inbox_width = 1;
+      in_chart_width = this.getInChartWidth();
+      out_box_width = this.getOutBoxWidth(in_chart_width, boxes);
+      in_box_width = this.getInBoxWidth(out_box_width);
+      if (in_box_width < 0) {
+        in_box_width = 1;
       }
       return this.box_width = {
         out: out_box_width,
-        "in": inbox_width
+        "in": in_box_width
       };
     },
     setScales: function(dataset) {

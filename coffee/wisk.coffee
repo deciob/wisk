@@ -48,12 +48,11 @@ define [
     
     constructor: (vis_id) ->
       @vis_id = vis_id
-      #@duration = 1000
       
     
     draw: (chart) ->
       self = @
-      dataset = self.c.dataset
+      dataset = @c.dataset
       @setScales(dataset)
       
       # Set the parent svg, with a g element that wraps everything else.
@@ -64,17 +63,17 @@ define [
         .attr("height", @c.height)
   
       # Set the axis (common to all boxes).
-      if self.c.axis then self.setYAxis.call(@, self)
+      if @c.axis then @setYAxis.call(@, self)
   
       # Set a common g element for all boxes.
-      self.boxes = self.svg.append("g")
+      @boxes = @svg.append("g")
         .attr("class", "boxes")
         .attr("transform",
           "translate(#{self.c.in_margin.left * 2}, #{self.c.in_margin.top})")
   
       # Individual boxes. Note the call to chart 
       # a closure returned by the init function
-      self.b = self.boxes.selectAll("g.box")
+      @b = @boxes.selectAll("g.box")
         .data(dataset.data)
       .enter().append("g")
         .attr("class", "box")
@@ -96,7 +95,7 @@ define [
   
   
     init: (conf) ->  
-      # returnes box
+      # returnes chart
     
       self = @
       
@@ -110,73 +109,72 @@ define [
         sub_ticks: no
         dataset:
           data:[[0]], min:0, max:0
-        stroke_width: 1
+        stroke_width: 5
         duration: 1000  # animation millisecs
   
       # height and width refer to the outer container 
       c.height = 500
       c.width = 600
+
+      @c = _.extend(c, conf)
   
-      if conf
-        @c = @extend(c, conf) 
-      else 
-        @c = c
-  
-      #console.log "@setBoxWidth() 1"
-      #@setBoxWidth()
-  
-      box = (g) ->
+      chart = (g) ->
         g.each( (d, i) ->
-          # create a box plot for each data group
+          # create a chart plot for each data group
           @g = d3.select(@)
           self.setSpread.call(@, self, d, i)
           self.setMidspread.call(@, self, d, i)
           self.setMedian.call(@, self, d, i)
         )
           
-      box.in_margin = (value) ->
+      chart.in_margin = (value) ->
         return self.c.in_margin unless arguments.length
         self.c.in_margin = value
-        box
+        chart
         
-      box.out_margin = (value) ->
+      chart.out_margin = (value) ->
         return self.c.out_margin unless arguments.length
         self.c.out_margin = value
-        box
+        chart
       
-      box.width = (value) ->
+      chart.width = (value) ->
         return self.c.width unless arguments.length
         self.c.width = value
-        box
+        chart
         
-      box.height = (value) ->
+      chart.height = (value) ->
         return self.c.height unless arguments.length
         self.c.height = value
-        box
+        chart
         
-      box.axis = (value) ->
+      chart.axis = (value) ->
         return self.c.axis unless arguments.length
         self.c.axis = value
-        box
+        chart
         
-      box.subTicks = (value) ->
+      chart.subTicks = (value) ->
         return self.c.sub_ticks unless arguments.length
         self.c.sub_ticks = value
-        box
+        chart
         
-      box.dataset = (value) ->
+      chart.dataset = (value) ->
         return self.c.dataset unless arguments.length
         self.c.dataset = value
         # set the box width once you know about the dataset (how many boxes?)
         self.setBoxWidth()
-        box
+        chart
   
-      box.stroke_width = (value) ->
+      chart.stroke_width = (value) ->
         return self.c.stroke_width unless arguments.length
         self.c.stroke_width = value
-        box
+        chart
+
+      chart.duration = (value) ->
+        return self.c.duration unless arguments.length
+        self.c.duration = value
+        chart
   
-      return box  ## end of init function, returns a closure
+      return chart  ## end of init function, returns a closure
   
   
     setSpread: (self, d, i) ->

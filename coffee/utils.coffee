@@ -4,21 +4,24 @@ define [
 
   Utils =
 
-    extend: (o, p) ->
-      # copied from: https://github.com/davidflanagan/javascript6_examples/
-      for prop in p         # For all props in p.
-        o[prop] = p[prop]   # Add the property to o.
-      o
+    getInChartWidth: () ->
+      @c.width - @c.out_margin.left - @c.out_margin.right
+
+    getOutBoxWidth: (in_chart_width, boxes) ->
+      Math.floor(in_chart_width / boxes) - @c.stroke_width * 2 - 1
+
+    getInBoxWidth: (out_box_width) ->
+      out_box_width - @c.in_margin.left - @c.in_margin.right
 
     setBoxWidth: () ->
       boxes = @c.dataset.data.length
-      inside_width = @c.width - @c.out_margin.left - @c.out_margin.right
-      out_box_width = Math.floor(inside_width / boxes) - @c.stroke_width * 2 - 1
-      inbox_width = out_box_width - @c.in_margin.left - @c.in_margin.right
-      if inbox_width < 0 then inbox_width = 1
+      in_chart_width = @getInChartWidth()
+      out_box_width = @getOutBoxWidth in_chart_width, boxes
+      in_box_width = @getInBoxWidth out_box_width
+      if in_box_width < 0 then in_box_width = 1
       @box_width = 
         out: out_box_width
-        in: inbox_width
+        in: in_box_width
 
     setScales: (dataset) ->
       self = @
@@ -27,13 +30,13 @@ define [
       # Compute the new y-scale.
       @y1 = d3.scale.linear()
         # range inverted because svg y positions are counted from top to bottom
-        .domain([dataset.min, dataset.max])                              # input
-        .rangeRound([self.c.height - margin_bottom - margin_top, 0])     # output 
+        .domain([dataset.min, dataset.max])                             # input
+        .rangeRound([self.c.height - margin_bottom - margin_top, 0])    # output 
       # Retrieve the old y-scale, if this is an update.
       @y0 = self.__chart__ || d3.scale.linear()
         # input inverted because svg y positions are counted from top to bottom
-        .domain([0, Infinity])                                           # input
-        .rangeRound(self.y1.range())                                     # output 
+        .domain([0, Infinity])                                          # input
+        .rangeRound(self.y1.range())                                    # output 
       # Stash the new y scale.
       @__chart__ = @y1
       

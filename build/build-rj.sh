@@ -8,8 +8,8 @@ command -v r.js > /dev/null 2>&1 || { echo "RequireJS needs to be installed usin
 coffee --compile --bare --output ../js ../coffee/
 
 r.js -o rjs-config.js out=../dist/wisk-rjs.js optimize=none
-#r.js -o rjs-config.js out=../dist/wisk-rjs.min.js optimize=uglify
+r.js -o rjs-config.js out=../dist/wisk-rjs.min.js optimize=uglify
 
-#gzip -9 -c ../dist/wisk-rjs.min.js > ../dist/wisk-rjs.min.js.gz
+gzip -9 -c ../dist/wisk-rjs.min.js > ../dist/wisk-rjs.min.js.gz
 
 #rm -r js

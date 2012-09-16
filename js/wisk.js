@@ -15,14 +15,14 @@ define(['utils'], function(Utils) {
     Wisk.prototype.draw = function(chart) {
       var dataset, self;
       self = this;
-      dataset = self.c.dataset;
+      dataset = this.c.dataset;
       this.setScales(dataset);
       self.svg = d3.select("#" + self.vis_id).append("svg").attr("class", "parent").attr("width", this.c.width).attr("height", this.c.height);
-      if (self.c.axis) {
-        self.setYAxis.call(this, self);
+      if (this.c.axis) {
+        this.setYAxis.call(this, self);
       }
-      self.boxes = self.svg.append("g").attr("class", "boxes").attr("transform", "translate(" + (self.c.in_margin.left * 2) + ", " + self.c.in_margin.top + ")");
-      return self.b = self.boxes.selectAll("g.box").data(dataset.data).enter().append("g").attr("class", "box").attr("width", self.c.width + self.c.in_margin.left + self.c.in_margin.right).attr("height", self.c.height + self.c.in_margin.bottom + self.c.in_margin.top).call(chart);
+      this.boxes = this.svg.append("g").attr("class", "boxes").attr("transform", "translate(" + (self.c.in_margin.left * 2) + ", " + self.c.in_margin.top + ")");
+      return this.b = this.boxes.selectAll("g.box").data(dataset.data).enter().append("g").attr("class", "box").attr("width", self.c.width + self.c.in_margin.left + self.c.in_margin.right).attr("height", self.c.height + self.c.in_margin.bottom + self.c.in_margin.top).call(chart);
     };
 
     Wisk.prototype.update = function(chart) {
@@ -39,7 +39,7 @@ define(['utils'], function(Utils) {
     };
 
     Wisk.prototype.init = function(conf) {
-      var box, c, self;
+      var c, chart, self;
       self = this;
       c = {
         out_margin: {
@@ -61,17 +61,13 @@ define(['utils'], function(Utils) {
           min: 0,
           max: 0
         },
-        stroke_width: 1,
+        stroke_width: 5,
         duration: 1000
       };
       c.height = 500;
       c.width = 600;
-      if (conf) {
-        this.c = this.extend(c, conf);
-      } else {
-        this.c = c;
-      }
-      box = function(g) {
+      this.c = _.extend(c, conf);
+      chart = function(g) {
         return g.each(function(d, i) {
           this.g = d3.select(this);
           self.setSpread.call(this, self, d, i);
@@ -79,64 +75,71 @@ define(['utils'], function(Utils) {
           return self.setMedian.call(this, self, d, i);
         });
       };
-      box.in_margin = function(value) {
+      chart.in_margin = function(value) {
         if (!arguments.length) {
           return self.c.in_margin;
         }
         self.c.in_margin = value;
-        return box;
+        return chart;
       };
-      box.out_margin = function(value) {
+      chart.out_margin = function(value) {
         if (!arguments.length) {
           return self.c.out_margin;
         }
         self.c.out_margin = value;
-        return box;
+        return chart;
       };
-      box.width = function(value) {
+      chart.width = function(value) {
         if (!arguments.length) {
           return self.c.width;
         }
         self.c.width = value;
-        return box;
+        return chart;
       };
-      box.height = function(value) {
+      chart.height = function(value) {
         if (!arguments.length) {
           return self.c.height;
         }
         self.c.height = value;
-        return box;
+        return chart;
       };
-      box.axis = function(value) {
+      chart.axis = function(value) {
         if (!arguments.length) {
           return self.c.axis;
         }
         self.c.axis = value;
-        return box;
+        return chart;
       };
-      box.subTicks = function(value) {
+      chart.subTicks = function(value) {
         if (!arguments.length) {
           return self.c.sub_ticks;
         }
         self.c.sub_ticks = value;
-        return box;
+        return chart;
       };
-      box.dataset = function(value) {
+      chart.dataset = function(value) {
         if (!arguments.length) {
           return self.c.dataset;
         }
         self.c.dataset = value;
         self.setBoxWidth();
-        return box;
+        return chart;
       };
-      box.stroke_width = function(value) {
+      chart.stroke_width = function(value) {
         if (!arguments.length) {
           return self.c.stroke_width;
         }
         self.c.stroke_width = value;
-        return box;
+        return chart;
       };
-      return box;
+      chart.duration = function(value) {
+        if (!arguments.length) {
+          return self.c.duration;
+        }
+        self.c.duration = value;
+        return chart;
+      };
+      return chart;
     };
 
     Wisk.prototype.setSpread = function(self, d, i) {
